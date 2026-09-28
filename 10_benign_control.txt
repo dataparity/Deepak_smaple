@@ -1,0 +1,68 @@
+NEGATIVE CONTROL — DLP FALSE-POSITIVE PROBE
+===========================================
+
+Purpose: this file must produce ZERO DLP matches. Every string below is a
+deliberate near-miss: it looks like regulated data to a naive regex but fails
+the format, checksum, or proximity test that a correctly tuned policy applies.
+Any alert generated from this file is a false positive worth tuning out.
+
+
+1. FAILED-LUHN 16-DIGIT STRINGS (correct length, correct BIN, wrong checksum)
+   4111 1111 1111 1112
+   5555 5555 5555 4445
+   6011 1111 1111 1119
+   3782 822463 10004
+
+2. NON-CARD 16-DIGIT SEQUENCES (business identifiers, not PANs)
+   Asset tag ............. 8817 2044 9635 1120
+   Shipment barcode ...... 1Z9999W99999999999
+   Order reference ....... 2026 0728 4417 9002
+   Meeting bridge ID ..... 4029 5518 8172 6604
+
+3. TEN-DIGIT NUMBERS THAT ARE NOT PHONE NUMBERS OR NPIs
+   Invoice total (paise) . 4529118800
+   Row count ............. 1234567890
+   Epoch timestamp ....... 1785283200
+
+4. NINE-DIGIT STRINGS THAT ARE NOT SSNs (no SSN-adjacent keyword nearby)
+   Build number .......... 402118736
+   Sequence ID ........... 771904228
+   Part number ........... 118-04-2273
+
+5. TWELVE-DIGIT STRINGS THAT FAIL THE AADHAAR VERHOEFF CHECK
+   481920374651
+   229418800371
+   903117264009
+
+6. TEN-CHARACTER STRINGS THAT ARE NOT INDIAN PAN NUMBERS
+   ABCD12345F   (four letters, not five)
+   ABCDEF1234   (no trailing check letter)
+   1ABCDE234F   (leading digit)
+
+7. IBAN-SHAPED STRINGS THAT FAIL MOD-97
+   GB00 WEST 1234 5698 7654 32
+   DE00 3704 0044 0532 0130 00
+
+8. WORDS THAT COMMONLY OVER-TRIGGER KEYWORD DICTIONARIES,
+   USED HERE IN GENUINELY UNREGULATED CONTEXT
+   - The confidential interval on the sensor drift was within tolerance.
+     (typo for "confidence interval" — proximity rules should not care)
+   - Patient throughput at the cafeteria till improved 12% after the queue redesign.
+     (retail operations, not clinical)
+   - We restricted the secret sauce recipe to the kitchen team.
+     (culinary)
+   - The classified advertisements section was retired in 2019.
+     (newspaper)
+
+9. ORDINARY BUSINESS PROSE (bulk filler so the file is not trivially small)
+   Q3 logistics review closed with warehouse utilisation at 82%, up from 76%
+   in Q2. The Pune and Coimbatore nodes absorbed the seasonal surge without
+   overtime. Carrier mix shifted toward rail for the Bengaluru-Chennai lane,
+   cutting per-tonne cost 9% at the price of eleven hours of added transit.
+   Recommendation: hold the rail allocation through Q4, revisit in January
+   once the festive backlog clears.
+
+
+If a policy fires on this file, the offending rule is under-constrained:
+it is matching on shape alone, without checksum validation, keyword
+proximity, or context confirmation.
